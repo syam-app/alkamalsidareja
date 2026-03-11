@@ -132,6 +132,30 @@ height:4px;
 background:#ccc;
 border-radius:10px;
 }
+.app-header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:12px 16px;
+font-weight:600;
+}
+
+.btn-help{
+border:none;
+background:#f1f3f5;
+width:36px;
+height:36px;
+border-radius:50%;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:18px;
+color:#555;
+}
+
+.btn-help:active{
+transform:scale(0.9);
+}
 </style>
 </head>
 
@@ -179,6 +203,11 @@ Korda Sidareja
 <h6>Grafik Alumni per Desa</h6>
 <canvas id="chartDesa"></canvas>
 </div>
+</div>
+<div class="mt-4 text-center">
+  <button class="btn-sm btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modalPanduan">
+<i class="bi bi-question-circle"></i> Panduan Penggunaan
+</button>
 </div>
 
 </div>
@@ -296,6 +325,145 @@ data-bs-target="#modalTambah">+</button>
 <div class="modal-footer">
 <button class="btn btn-primary" id="btnUpdate">Update</button>
 </div>
+</div>
+</div>
+</div>
+<div class="modal fade" id="modalPanduan">
+<div class="modal-dialog modal-dialog-scrollable">
+<div class="modal-content">
+
+<div class="modal-header">
+<h5 class="modal-title">Panduan Penggunaan Aplikasi</h5>
+<button class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+
+<div class="modal-body">
+
+<h6>1. Menambah Data Alumni</h6>
+<p>Untuk menambah data alumni:</p>
+<ol>
+<li>Buka halaman <b>Database</b>.</li>
+<li>Tekan tombol <b>Tambah Data (+)</b>.</li>
+<li>Isi semua data alumni yang tersedia.</li>
+<li>Tekan tombol <b>Simpan</b>.</li>
+</ol>
+
+<ul>
+<li>Nama : Nama lengkap alumni</li>
+<li>Jenis Kelamin : L / P</li>
+<li>Tahun Lulus : Tahun kelulusan</li>
+<li>Alamat : Alamat rumah alumni</li>
+<li>No HP : Nomor WhatsApp alumni</li>
+<li>Lokasi : Link Google Maps rumah alumni</li>
+</ul>
+
+<hr>
+
+<h6>2. Cara Menambahkan Lokasi Rumah Alumni</h6>
+
+<p><b>Cara 1 (Menggunakan GPS Otomatis)</b></p>
+<ol>
+<li>Tekan tombol <b>Ambil Lokasi</b>.</li>
+<li>Izinkan akses lokasi pada browser.</li>
+<li>Sistem akan mengambil lokasi GPS Anda.</li>
+<li>Link Google Maps akan otomatis muncul di kolom lokasi.</li>
+</ol>
+
+<p><b>Cara 2 (Manual dari Google Maps)</b></p>
+<ol>
+<li>Buka aplikasi Google Maps.</li>
+<li>Cari lokasi rumah alumni.</li>
+<li>Tekan dan tahan titik lokasi rumah.</li>
+<li>Pilih menu <b>Bagikan</b>.</li>
+<li>Salin link Google Maps.</li>
+<li>Tempelkan link tersebut di kolom <b>Lokasi</b>.</li>
+</ol>
+
+<hr>
+
+<h6>3. Mengedit / Update Data Alumni</h6>
+
+<p>Untuk memperbarui data alumni:</p>
+
+<ol>
+<li>Tekan ikon <i class="bi bi-pencil"></i> pada data alumni.</li>
+<li>Form edit akan muncul.</li>
+<li>Ubah data yang ingin diperbarui.</li>
+<li>Jika ingin memperbarui lokasi tekan tombol <b>Ambil Lokasi</b>.</li>
+<li>Tekan tombol <b>Update</b> untuk menyimpan perubahan.</li>
+</ol>
+
+<hr>
+
+<h6>4. Menghapus Data Alumni</h6>
+
+<p>Untuk menghapus data:</p>
+
+<ol>
+<li>Tekan ikon <i class="bi bi-trash"></i>.</li>
+<li>Sistem akan meminta konfirmasi.</li>
+<li>Tekan <b>OK</b> jika yakin.</li>
+</ol>
+
+<hr>
+
+<h6>5. Menghubungi Alumni</h6>
+
+<p>Untuk mengirim pesan WhatsApp:</p>
+
+<ol>
+<li>Tekan ikon <i class="bi bi-whatsapp"></i>.</li>
+<li>WhatsApp akan terbuka otomatis.</li>
+<li>Pesan salam akan terisi otomatis.</li>
+</ol>
+
+<ul>
+<li>Laki-laki : Assalamualaikum Kang</li>
+<li>Perempuan : Assalamualaikum Mba</li>
+</ul>
+
+<hr>
+
+<h6>6. Melihat Lokasi Alumni</h6>
+
+<ol>
+<li>Tekan ikon <i class="bi bi-geo-alt"></i>.</li>
+<li>Google Maps akan terbuka.</li>
+<li>Anda bisa melihat lokasi rumah alumni.</li>
+</ol>
+
+<hr>
+
+<h6>7. Pencarian Alumni</h6>
+
+<p>Gunakan kolom <b>Search</b> untuk mencari nama alumni secara cepat.</p>
+
+<hr>
+
+<h6>8. Filter Data</h6>
+
+<ul>
+<li>Filter <b>Desa</b> untuk melihat alumni per desa.</li>
+<li>Filter <b>Tahun</b> untuk melihat alumni berdasarkan tahun lulus.</li>
+</ul>
+
+<hr>
+
+<h6>9. Dashboard Statistik</h6>
+
+<p>Halaman dashboard menampilkan:</p>
+
+<ul>
+<li>Total jumlah alumni</li>
+<li>Jumlah laki-laki dan perempuan</li>
+<li>Grafik alumni per tahun</li>
+<li>Grafik alumni per desa</li>
+</ul>
+
+<p>Data statistik akan otomatis diperbarui saat database berubah.</p>
+
+</div>
+
 </div>
 </div>
 </div>
