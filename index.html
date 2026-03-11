@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Database Alumni Ponpes</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+
+body{background:#f4f6fb;font-family:system-ui;padding-bottom:90px}
+
+.header{
+background:linear-gradient(120deg,#89f7fe,#66a6ff);
+color:white;padding:25px;border-radius:0 0 25px 25px;
+text-align:center;margin-bottom:20px
+}
+
+.card-soft{
+border:none;border-radius:16px;
+box-shadow:0 4px 14px rgba(0,0,0,.08)
+}
+
+.avatar{
+width:45px;height:45px;border-radius:50%;
+display:flex;align-items:center;justify-content:center;
+font-weight:bold;color:white;font-size:21px
+}
+
+.alumni{
+display:flex;gap:12px;padding:10px;
+border-bottom:1px solid #eee;
+align-items:center;transition:.2s
+}
+
+.alumni:hover{background:#f1f4ff}
+
+.bottom-nav{
+position:fixed;
+bottom:0;
+left:0;
+right:0;
+height:65px;
+background:#ffffff;
+display:flex;
+justify-content:space-around;
+align-items:center;
+box-shadow:0 -2px 15px rgba(0,0,0,0.08);
+border-top-left-radius:18px;
+border-top-right-radius:18px;
+z-index:1000;
+}
+
+.nav-btn{
+flex:1;
+border:none;
+background:none;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+font-size:13px;
+color:#777;
+gap:2px;
+transition:0.2s;
+}
+
+.nav-btn i{
+font-size:20px;
+}
+.nav-btn span{
+font-size:15px;
+}
+.nav-btn.active{
+color:#0d6efd;
+font-weight:600;
+}
+
+.nav-btn.active i{
+transform:scale(1.2);
+}
+.nav-btn.active span{
+transform:scale(1.2);
+}
+
+.nav-btn:active{
+transform:scale(0.92);
+}
+
+.loading{
+text-align:center;padding:40px;color:#777
+}
+
+.dark{
+background:#121212;color:#eee
+}
+
+.dark .card-soft{
+background:#1f1f1f;color:#eee
+}
+
+.dark .bottom-nav{
+background:#1f1f1f
+}
+
+.dark .alumni:hover{
+background:#2c2c2c
+}
+
+.aksi-grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:4px;
+width:60px;
+}
+.filter-desa{
+display:flex;
+overflow-x:auto;
+white-space:nowrap;
+gap:6px;
+padding-bottom:4px;
+}
+
+.filter-desa::-webkit-scrollbar{
+height:4px;
+}
+
+.filter-desa::-webkit-scrollbar-thumb{
+background:#ccc;
+border-radius:10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="text-uppercase header">
+<h3 class="fw-semibold">Database Al-Kamal Cilacap</h3>
+Korda Sidareja
+</div>
+
+<div class="container">
+
+<!-- DASHBOARD -->
+<div id="pageDashboard">
+
+<div class="row" id="statistik"></div>
+
+<div class="row mt-3">
+
+<div class="col-6">
+<div class="card card-soft text-center p-3">
+<b>Total Alumni</b>
+<h3 id="totalAlumni">0</h3>
+</div>
+</div>
+
+<div class="col-6">
+<div class="card card-soft text-center p-3">
+<b>L / P</b>
+<h3 id="statGender">0 / 0</h3>
+</div>
+</div>
+
+</div>
+
+<div class="card card-soft mt-3">
+<div class="card-body">
+<h6>Grafik Alumni per Tahun</h6>
+<canvas id="chartTahun"></canvas>
+</div>
+</div>
+
+<div class="card card-soft mt-3">
+<div class="card-body">
+<h6>Grafik Alumni per Desa</h6>
+<canvas id="chartDesa"></canvas>
+</div>
+</div>
+
+</div>
+
+<!-- DATABASE -->
+<div id="pageDatabase" style="display:none">
+
+<div class="d-flex gap-2 mb-2">
+<input id="search" class="form-control" placeholder="Cari alumni...">
+<select id="filterTahun" class="form-select">
+<option value="ALL">Semua Tahun</option>
+</select>
+</div>
+
+<div id="filterDesaContainer" class="mb-3 filter-desa"></div>
+
+<!--div class="d-flex gap-2 mb-3">
+<button class="btn btn-success btn-sm" id="btnExport">Export Excel</button>
+<button class="btn btn-secondary btn-sm" id="btnBackup">Backup JSON</button>
+<input type="file" id="importJSON" hidden>
+<button class="btn btn-warning btn-sm" id="btnImport">Import JSON</button>
+<button class="btn btn-dark btn-sm" id="btnDark">Dark Mode</button>
+</div -->
+
+<div id="desaContainer"></div>
+<div id="loading" class="loading">Memuat data...</div>
+
+</div>
+
+</div>
+
+<!-- FLOAT BUTTON -->
+<button class="btn btn-primary rounded-circle"
+style="position:fixed;bottom:90px;right:20px;width:60px;height:60px;font-size:25px"
+data-bs-toggle="modal"
+data-bs-target="#modalTambah">+</button>
+
+<!-- NAV -->
+<div class="bottom-nav">
+
+<button id="btnDashboard" class="nav-btn active">
+<i class="bi bi-speedometer2"></i>
+<span>Dashboard</span>
+</button>
+
+<button id="btnDatabase" class="nav-btn">
+<i class="bi bi-database"></i>
+<span>Database</span>
+</button>
+
+</div>
+<!-- MODAL TAMBAH -->
+<div class="modal fade" id="modalTambah">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header"><h5>Tambah Alumni</h5></div>
+<div class="modal-body">
+
+<select id="desa" class="form-control mb-2">
+<option value="">Pilih Desa</option>
+</select>
+
+<input id="nama" class="form-control mb-2" placeholder="Nama">
+
+<div class="mb-2">
+<label class="form-label">Jenis Kelamin</label>
+<div>
+<label class="me-3"><input type="radio" name="jk" value="L" checked> L</label>
+<label><input type="radio" name="jk" value="P"> P</label>
+</div>
+</div>
+
+<input id="tahun" class="form-control mb-2" placeholder="Tahun Lulus">
+<input id="alamat" class="form-control mb-2" placeholder="Alamat">
+<input id="hp" class="form-control mb-2" placeholder="No HP">
+<input id="lokasi" class="form-control mb-2" placeholder="Link lokasi Google Maps">
+<div class="d-grid mb-2">
+<button class="btn btn-outline-primary btn-sm" onclick="getLokasi()">
+<i class="bi bi-crosshair"></i> Ambil Lokasi Saat Ini
+</button>
+</div>
+</div>
+<div class="modal-footer">
+<button class="btn btn-success" id="btnSimpan">Simpan</button>
+</div>
+</div>
+</div>
+</div>
+
+<!-- MODAL EDIT -->
+<div class="modal fade" id="modalEdit">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header"><h5>Edit Alumni</h5></div>
+<div class="modal-body">
+
+<input id="editNama" class="form-control mb-2">
+
+<div class="mb-2">
+<label class="form-label">Jenis Kelamin</label>
+<div>
+<label class="me-3"><input type="radio" name="editjk" value="L"> L</label>
+<label><input type="radio" name="editjk" value="P"> P</label>
+</div>
+</div>
+
+<input id="editTahun" class="form-control mb-2">
+<input id="editAlamat" class="form-control mb-2">
+<input id="editHP" class="form-control mb-2">
+<input id="editLokasi" class="form-control mb-2">
+<button class="btn btn-outline-primary btn-sm" onclick="getLokasiEdit()">
+<i class="bi bi-crosshair"></i> Update Lokasi
+</button>
+</div>
+<div class="modal-footer">
+<button class="btn btn-primary" id="btnUpdate">Update</button>
+</div>
+</div>
+</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script type="module">
+
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import{getDatabase,ref,push,remove,update,onValue}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+const firebaseConfig={
+apiKey:"AIzaSyAZB64iFTGI2O8X-Ww1dltICSgHFp16UZs",
+authDomain:"database-umum.firebaseapp.com",
+databaseURL:"https://database-umum-default-rtdb.firebaseio.com",
+projectId:"database-umum",
+storageBucket:"database-umum.firebasestorage.app",
+messagingSenderId:"682180323327",
+appId:"1:682180323327:web:d3faf3cf746a35e7ff69ca"
+};
+
+const app=initializeApp(firebaseConfig);
+const db=getDatabase(app);
+
+const desaList=["Gunungreja","Karanggedang","Kunci","Margasari","Penyarang","Sidamulya","Sidareja","Sudagaran","Tegalsari","Tinggarjaya"];
+
+let allData=[];
+let chartTahun,chartDesa;
+let filterDesa="ALL";
+let editDesa,editId;
+
+const search=document.getElementById("search");
+const filterTahun=document.getElementById("filterTahun");
+const desaContainer=document.getElementById("desaContainer");
+const editLokasi=document.getElementById("editLokasi");
+function avatar(n){
+let w=n.trim().split(" ");
+if(w.length==1)return w[0][0].toUpperCase();
+return(w[0][0]+w[1][0]).toUpperCase()
+}
+
+function color(str){
+let h=0;
+for(let i=0;i<str.length;i++){h=str.charCodeAt(i)+((h<<5)-h)}
+let c="#";
+for(let i=0;i<3;i++){
+let v=(h>>(i*8))&255;
+c+=("00"+v.toString(16)).slice(-2)
+}
+return c
+}
+
+function init(){
+
+let filterHTML=`<button class="btn btn-sm btn-primary filterDesa" data-desa="ALL">Semua</button>`;
+
+desaList.forEach(d=>{
+document.getElementById("desa").innerHTML+=`<option>${d}</option>`;
+filterHTML+=`<button class="btn btn-sm btn-outline-primary me-1 mb-1 filterDesa" data-desa="${d}">${d}</button>`
+});
+
+document.getElementById("filterDesaContainer").innerHTML=filterHTML;
+
+document.querySelectorAll(".filterDesa").forEach(b=>{
+b.onclick=()=>{
+filterDesa=b.dataset.desa;
+render()
+}
+});
+
+listen()
+
+}
+
+function listen(){
+
+onValue(ref(db,"Kecamatan Sidareja"),snap=>{
+
+allData=[];
+if(!snap.exists()){ document.getElementById("loading").innerText="Belum ada data"; return; }
+
+let data=snap.val();
+
+for(const desa in data){
+for(const id in data[desa]){
+let d=data[desa][id];
+d.id=id;
+d.desa=desa;
+allData.push(d)
+}
+}
+
+render()
+isiFilterTahun()
+document.getElementById("loading").style.display="none"
+})
+
+}
+
+function render(){
+
+let r=[...allData];
+
+if(filterDesa!="ALL")r=r.filter(d=>d.desa==filterDesa);
+
+if(search.value){
+let k=search.value.toLowerCase();
+r=r.filter(d=>d.nama.toLowerCase().includes(k))
+}
+if(filterTahun.value!="ALL"){
+r=r.filter(d=>String(d.tahun_lulus)===filterTahun.value)
+}
+r=r.sort((a,b)=>a.nama.localeCompare(b.nama));
+
+let html="";
+let L=0,P=0;
+
+r.forEach(d=>{
+
+if(d.jk=="L")L++;
+if(d.jk=="P")P++;
+
+html+=`
+<div class="alumni">
+<div class="avatar" style="background:${color(d.nama)}">${avatar(d.nama)}</div>
+<div style="flex:1">
+<b>${d.nama}</b><br>
+<span class="text-secondary">${d.jk} / Alumni ${d.tahun_lulus}<br>
+${d.desa} ${d.alamat}</span>
+</div>
+<div class="aksi-grid">
+
+<button class="btn btn-sm btn-success"
+onclick="kirimWA('${d.no_hp}','${d.jk}','${d.nama}')">
+<i class="bi bi-whatsapp"></i>
+</button>
+
+<button class="btn btn-sm btn-info"
+onclick="bukaLokasi('${d.lokasi ?? ""}')">
+<i class="bi bi-geo-alt"></i>
+</button>
+
+<button class="btn btn-sm btn-warning"
+onclick="openEdit('${d.desa}','${d.id}','${d.nama}','${d.tahun_lulus}','${d.alamat}','${d.no_hp}','${d.jk}','${d.lokasi}')">
+<i class="bi bi-pencil"></i>
+</button>
+
+<button class="btn btn-sm btn-danger"
+onclick="hapus('${d.desa}','${d.id}')">
+<i class="bi bi-trash"></i>
+</button>
+
+</div>
+</div>
+`
+});
+
+desaContainer.innerHTML=html;
+
+document.getElementById("totalAlumni").innerText=r.length;
+document.getElementById("statGender").innerText=L+" / "+P;
+
+renderChart()
+
+}
+
+function renderChart(){
+
+let tahun={};
+let desa={};
+
+allData.forEach(d=>{
+tahun[d.tahun_lulus]=(tahun[d.tahun_lulus]||0)+1;
+desa[d.desa]=(desa[d.desa]||0)+1
+});
+
+if(chartTahun)chartTahun.destroy();
+chartTahun=new Chart(document.getElementById("chartTahun"),{
+type:"bar",
+data:{labels:Object.keys(tahun).sort(),datasets:[{label:"Alumni",data:Object.values(tahun)}]}
+});
+
+if(chartDesa)chartDesa.destroy();
+chartDesa=new Chart(document.getElementById("chartDesa"),{
+type:"pie",
+data:{labels:Object.keys(desa),datasets:[{data:Object.values(desa)}]}
+})
+
+}
+
+function isiFilterTahun(){
+
+let tahunSet=new Set();
+
+allData.forEach(d=>{
+if(d.tahun_lulus) tahunSet.add(d.tahun_lulus);
+});
+
+let tahunArray=[...tahunSet].sort();
+
+let html='<option value="ALL">Semua Tahun</option>';
+
+tahunArray.forEach(t=>{
+html+=`<option value="${t}">${t}</option>`;
+});
+
+filterTahun.innerHTML=html;
+
+}
+
+window.hapus=(desa,id)=>{
+if(!confirm("Hapus data?"))return;
+remove(ref(db,"Kecamatan Sidareja/"+desa+"/"+id))
+};
+
+window.openEdit=(desa,id,nama,tahun,alamat,hp,jk,lokasi)=>{
+editDesa=desa;
+editId=id;
+editNama.value=nama;
+editTahun.value=tahun;
+editAlamat.value=alamat;
+editHP.value=hp;
+editLokasi.value=lokasi||"";
+document.querySelector(`input[name="editjk"][value="${jk}"]`).checked=true;
+new bootstrap.Modal(document.getElementById("modalEdit")).show()
+};
+window.kirimWA=function(no,jk,nama){
+
+if(!no){
+alert("Nomor belum ada");
+return;
+}
+
+let pesan = jk==="L"
+? `Assalamualaikum Kang ${nama}`
+: `Assalamualaikum Mba ${nama}`;
+
+let url=`https://wa.me/${no.replace(/^0/,'62').replace(/\s/g,'')}?text=${encodeURIComponent(pesan)}`;
+
+window.open(url,"_blank");
+
+}
+
+window.bukaLokasi=function(link){
+
+if(!link){
+alert("Lokasi belum diisi");
+return;
+}
+
+window.open(link,"_blank");
+
+}
+
+btnUpdate.onclick=()=>{
+let jk=document.querySelector('input[name="editjk"]:checked').value;
+
+update(ref(db,"Kecamatan Sidareja/"+editDesa+"/"+editId),{
+nama:editNama.value,
+tahun_lulus:editTahun.value,
+alamat:editAlamat.value,
+no_hp:editHP.value,
+lokasi:editLokasi.value,
+jk
+});
+
+bootstrap.Modal.getInstance(document.getElementById("modalEdit")).hide()
+};
+
+btnSimpan.onclick=()=>{
+
+let desa=document.getElementById("desa").value;
+let nama=document.getElementById("nama").value;
+let tahun=document.getElementById("tahun").value;
+let alamat=document.getElementById("alamat").value;
+let hp=document.getElementById("hp").value;
+let jk=document.querySelector('input[name="jk"]:checked').value;
+
+push(ref(db,"Kecamatan Sidareja/"+desa),{
+nama,tahun_lulus:tahun,alamat,no_hp:hp,lokasi:document.getElementById("lokasi").value,jk
+});
+
+document.getElementById("nama").value="";
+document.getElementById("tahun").value="";
+document.getElementById("alamat").value="";
+document.getElementById("hp").value="";
+document.getElementById("lokasi").value="";
+
+bootstrap.Modal.getInstance(document.getElementById("modalTambah")).hide()
+
+};
+window.getLokasi=function(){
+
+if(!navigator.geolocation){
+alert("Browser tidak mendukung GPS");
+return;
+}
+
+navigator.geolocation.getCurrentPosition(pos=>{
+
+let lat=pos.coords.latitude;
+let lng=pos.coords.longitude;
+
+let link=`https://www.google.com/maps?q=${lat},${lng}`;
+
+document.getElementById("lokasi").value=link;
+
+},()=>{
+
+alert("Gagal mengambil lokasi");
+
+});
+
+}
+window.getLokasiEdit=function(){
+
+navigator.geolocation.getCurrentPosition(pos=>{
+
+let lat=pos.coords.latitude;
+let lng=pos.coords.longitude;
+
+let link=`https://www.google.com/maps?q=${lat},${lng}`;
+
+editLokasi.value=link;
+
+});
+
+}
+search.addEventListener("keyup",render);
+filterTahun.addEventListener("change",render);
+btnDashboard.onclick=()=>{
+pageDashboard.style.display="block";
+pageDatabase.style.display="none";
+
+btnDashboard.classList.add("active");
+btnDatabase.classList.remove("active");
+};
+
+btnDatabase.onclick=()=>{
+pageDashboard.style.display="none";
+pageDatabase.style.display="block";
+
+btnDatabase.classList.add("active");
+btnDashboard.classList.remove("active");
+};
+
+init();
+
+  </script>
