@@ -1,55 +1,124 @@
-<!DOCTYPE html><html lang="id">
+<!DOCTYPE html>
+<html lang="id">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Pendataan Alumni</title><link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"><style>
+<title>Pendataan Alumni</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+<style>
 
 body{
-background:#f5f7fb;
+background:linear-gradient(135deg,#e8f0ff,#f5f7fb);
 font-family:system-ui;
 padding:20px;
 }
 
 .card-form{
-max-width:520px;
+max-width:560px;
 margin:auto;
-border-radius:16px;
-box-shadow:0 10px 30px rgba(0,0,0,.08);
+border-radius:18px;
+border:none;
+box-shadow:0 15px 40px rgba(0,0,0,.08);
+}
+
+.header-box{
+text-align:center;
+padding-bottom:10px;
+border-bottom:1px solid #eee;
+margin-bottom:15px;
+}
+
+.logo{
+width:70px;
+margin-bottom:10px;
+}
+
+.badge-resmi{
+background:#198754;
+font-size:12px;
+margin-bottom:10px;
 }
 
 .progress{
 height:8px;
+border-radius:20px;
 }
 
-.title{
-text-align:center;
-font-weight:700;
-margin-bottom:15px;
+.progress-bar{
+transition:0.4s;
 }
 
-</style></head><body><div class="card card-form p-4"><div class="title">
-<h5>Pendataan Alumni PPMAC</h5>
-<small>Isi data dengan benar</small>
-</div><div class="progress mb-3">
-<div id="progressBar" class="progress-bar" style="width:0%"></div>
-</div><div class="mb-3">
+.form-label{
+font-weight:600;
+}
+
+.btn{
+border-radius:10px;
+}
+
+#mapLink{
+display:none;
+}
+
+.loading{
+display:none;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="card card-form p-4">
+
+<div class="header-box">
+
+<img src="https://cdn.jsdelivr.net/gh/syam-app/alkamalsidareja@7fc0f22c00a945e723d50afb8221ae2a71c78538/logoalkamal.webp" class="logo">
+
+<h5 class="fw-bold">
+SISTEM KOLEKTIF DATA
+</h5>
+
+<h6>
+ALUMNI KELUARGA MIFTAHUL HUDA<br>
+AL-AZHAR CITANGKOLO<br>
+KORDA CILACAP<br>
+KECAMATAN SIDAREJA
+</h6>
+
+</div>
+
+<div class="progress mb-4">
+<div id="progressBar" class="progress-bar bg-success" style="width:0%"></div>
+</div>
+
+<div class="mb-3">
 <label class="form-label">Nama Lengkap</label>
 <input id="nama" class="form-control form-input">
-</div><div class="mb-3">
+</div>
+
+<div class="mb-3">
 <label class="form-label">Jenis Kelamin</label>
 <div>
 <label class="me-3">
 <input type="radio" name="jk" value="L" class="form-input"> Laki-laki
 </label>
+
 <label>
 <input type="radio" name="jk" value="P" class="form-input"> Perempuan
 </label>
 </div>
-</div><div class="mb-3">
+</div>
+
+<div class="mb-3">
 <label class="form-label">Tahun Lulus</label>
-<input id="tahun" type="number" class="form-control form-input">
-</div><div class="mb-3">
+<input id="tahun" type="number" class="form-control form-input" placeholder="Contoh : 2018">
+</div>
+
+<div class="mb-3">
 <label class="form-label">Desa</label>
 <select id="desa" class="form-control form-input">
 <option value="">Pilih Desa</option>
@@ -64,19 +133,150 @@ margin-bottom:15px;
 <option>Tegalsari</option>
 <option>Tinggarjaya</option>
 </select>
-</div><div class="mb-3">
+</div>
+
+<div class="mb-3">
 <label class="form-label">Alamat</label>
-<input id="alamat" class="form-control form-input" placeholder="Cukup RT RW">
-</div><div class="mb-3">
+<input id="alamat" class="form-control form-input" placeholder="Isi RT/RW saja">
+</div>
+
+<div class="mb-3">
 <label class="form-label">Nomor WhatsApp</label>
-<input id="hp" type="number" class="form-control form-input" placeholder="08xxxxxxxxxx">
+<input id="hp" class="form-control form-input" placeholder="08xxxxxxxxxx">
 <small id="hpError" class="text-danger d-none">Nomor WA tidak valid</small>
-</div><div class="mb-3">
-<label class="form-label">Lokasi Rumah</label><input id="lokasi" class="form-control form-input mb-2" placeholder="Link Google Maps"><button class="btn btn-outline-primary btn-sm w-100" onclick="getLokasi()">
-<i class="bi bi-crosshair"></i> Ambil Lokasi Saat Ini
-</button></div><button id="btnKirim" class="btn btn-primary w-100">
+</div>
+
+<div class="mb-3">
+
+<label class="form-label">Lokasi Rumah</label>
+
+<input id="lokasi" class="form-control form-input mb-2" readonly placeholder="Link Google Maps">
+
+<div class="d-flex gap-2">
+
+<button class="btn btn-outline-success w-100" onclick="getLokasi()">
+<i class="bi bi-crosshair"></i> Ambil Lokasi
+</button>
+
+<button class="btn btn-outline-secondary"
+data-bs-toggle="modal"
+data-bs-target="#tutorialModal">
+
+<i class="bi bi-question-circle"></i>
+Tutorial
+
+</button>
+
+</div>
+
+<a id="mapLink" target="_blank" class="btn btn-sm btn-outline-primary mt-2 w-100">
+<i class="bi bi-map"></i> Lihat Lokasi di Google Maps
+</a>
+
+</div>
+
+<button id="btnKirim" class="btn btn-success w-100">
+
+<span class="textBtn">
+<i class="bi bi-send"></i>
 Kirim Data Alumni
-</button><div id="status" class="text-center mt-3"></div></div><script type="module">
+</span>
+
+<span class="loading">
+<span class="spinner-border spinner-border-sm"></span>
+Mengirim...
+</span>
+
+</button>
+
+<div id="status" class="text-center mt-3"></div>
+
+<div class="mt-4 text-center">
+
+<hr>
+
+<p class="small text-muted mb-2">
+Untuk informasi lebih lanjut atau perubahan data hubungi penanggung jawab
+</p>
+
+<div class="d-flex flex-column gap-2">
+
+<a href="https://wa.me/6285862732842?text=Assalamualaikum kang Toni"
+class="btn btn-outline-success btn-sm">
+
+<i class="bi bi-whatsapp"></i>
+Kang Fatoni
+
+</a>
+
+<a href="https://wa.me/6289635918035?text=Assalamualaikum kang Labib"
+class="btn btn-outline-success btn-sm">
+
+<i class="bi bi-whatsapp"></i>
+Kang Labib Imamsyah
+
+</a>
+
+<a href="https://wa.me/6285156850068?text=Assalamualaikum kang Hisyam"
+class="btn btn-outline-success btn-sm">
+
+<i class="bi bi-whatsapp"></i>
+Kang Hisyam Aziz
+
+</a>
+
+</div>
+
+</div>
+</div>
+
+
+<!-- MODAL TUTORIAL -->
+
+<div class="modal fade" id="tutorialModal">
+
+<div class="modal-dialog">
+
+<div class="modal-content">
+
+<div class="modal-header">
+
+<h5 class="modal-title">
+Tutorial Mengambil Lokasi
+</h5>
+
+<button class="btn-close" data-bs-dismiss="modal"></button>
+
+</div>
+
+<div class="modal-body">
+
+<ol>
+
+<li>Tekan tombol <b>Ambil Lokasi</b></li>
+<li>Izinkan akses lokasi</li>
+<li>Tunggu beberapa detik</li>
+<li>Link Google Maps otomatis muncul</li>
+
+</ol>
+
+<div class="alert alert-info mt-3">
+Pastikan GPS HP aktif
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+
+<script type="module">
 
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import{getDatabase,ref,push}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
@@ -122,7 +322,7 @@ i.addEventListener("change",updateProgress);
 
 function validWA(no){
 
-let hp=no.replace(/\s/g,'');
+let hp=no.replace(/\D/g,'');
 
 if(!/^08\d{8,12}$/.test(hp))return false;
 
@@ -130,36 +330,43 @@ return true;
 
 }
 
-btnKirim.onclick=()=>{
+btnKirim.onclick = async () => {
 
-let nama=document.getElementById("nama").value.trim();
-let tahun=document.getElementById("tahun").value;
-let desa=document.getElementById("desa").value;
-let alamat=document.getElementById("alamat").value.trim();
-let hp=document.getElementById("hp").value.trim();
-let lokasi=document.getElementById("lokasi").value.trim();
-let jk=document.querySelector('input[name="jk"]:checked')?.value;
+let namaInput = document.getElementById("nama").value.trim();
+let tahunInput = document.getElementById("tahun").value;
+let desaInput = document.getElementById("desa").value;
+let alamatInput = document.getElementById("alamat").value.trim();
+let hpInput = document.getElementById("hp").value.trim();
+let lokasiInput = document.getElementById("lokasi").value.trim();
+let jk = document.querySelector('input[name="jk"]:checked')?.value;
 
-let status=document.getElementById("status");
+let status = document.getElementById("status");
+let textBtn = document.querySelector(".textBtn");
+let loading = document.querySelector(".loading");
 
-if(!nama||!tahun||!desa||!alamat||!hp||!jk){
+if(!namaInput || !tahunInput || !desaInput || !alamatInput || !hpInput || !jk){
 status.innerHTML="<span class='text-danger'>Lengkapi semua data</span>";
 return;
 }
 
-if(!validWA(hp)){
-document.getElementById("hpError").classList.remove("d-none");
+if(!validWA(hpInput)){
+hpError.classList.remove("d-none");
 return;
 }else{
-document.getElementById("hpError").classList.add("d-none");
+hpError.classList.add("d-none");
 }
 
-push(ref(db,"Kecamatan Sidareja/"+desa),{
-nama,
-tahun_lulus:tahun,
-alamat,
-no_hp:hp,
-lokasi,
+textBtn.style.display="none";
+loading.style.display="inline";
+
+try{
+btnKirim.disabled = true;
+await push(ref(db,"Kecamatan Sidareja/"+desaInput),{
+nama:namaInput,
+tahun_lulus:tahunInput,
+alamat:alamatInput,
+no_hp:hpInput,
+lokasi:lokasiInput,
 jk
 });
 
@@ -168,7 +375,21 @@ status.innerHTML="<span class='text-success'>Data berhasil dikirim</span>";
 document.querySelectorAll("input").forEach(e=>e.value="");
 document.querySelectorAll('input[name="jk"]').forEach(e=>e.checked=false);
 
+document.getElementById("mapLink").style.display="none";
+
 updateProgress();
+
+}catch(err){
+
+console.error(err);
+status.innerHTML="<span class='text-danger'>Gagal mengirim data</span>";
+
+}finally{
+
+textBtn.style.display="inline";
+loading.style.display="none";
+
+}
 
 }
 
@@ -179,7 +400,9 @@ alert("Browser tidak mendukung GPS");
 return;
 }
 
-navigator.geolocation.getCurrentPosition(pos=>{
+navigator.geolocation.getCurrentPosition(
+
+function(pos){
 
 let lat=pos.coords.latitude;
 let lng=pos.coords.longitude;
@@ -188,13 +411,32 @@ let link=`https://www.google.com/maps?q=${lat},${lng}`;
 
 document.getElementById("lokasi").value=link;
 
+let mapLink=document.getElementById("mapLink");
+mapLink.href=link;
+mapLink.style.display="block";
+
 updateProgress();
 
-});
+},
+
+function(error){
+
+alert("Gagal mengambil lokasi. Pastikan GPS aktif.");
+
+},
+
+{
+enableHighAccuracy:true,
+timeout:10000
+}
+
+);
 
 }
 
 updateProgress();
 
-</script></body>
+</script>
+
+</body>
 </html>
