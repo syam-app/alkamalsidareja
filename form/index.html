@@ -1,0 +1,200 @@
+<!DOCTYPE html><html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pendataan Alumni</title><link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"><style>
+
+body{
+background:#f5f7fb;
+font-family:system-ui;
+padding:20px;
+}
+
+.card-form{
+max-width:520px;
+margin:auto;
+border-radius:16px;
+box-shadow:0 10px 30px rgba(0,0,0,.08);
+}
+
+.progress{
+height:8px;
+}
+
+.title{
+text-align:center;
+font-weight:700;
+margin-bottom:15px;
+}
+
+</style></head><body><div class="card card-form p-4"><div class="title">
+<h5>Pendataan Alumni PPMAC</h5>
+<small>Isi data dengan benar</small>
+</div><div class="progress mb-3">
+<div id="progressBar" class="progress-bar" style="width:0%"></div>
+</div><div class="mb-3">
+<label class="form-label">Nama Lengkap</label>
+<input id="nama" class="form-control form-input">
+</div><div class="mb-3">
+<label class="form-label">Jenis Kelamin</label>
+<div>
+<label class="me-3">
+<input type="radio" name="jk" value="L" class="form-input"> Laki-laki
+</label>
+<label>
+<input type="radio" name="jk" value="P" class="form-input"> Perempuan
+</label>
+</div>
+</div><div class="mb-3">
+<label class="form-label">Tahun Lulus</label>
+<input id="tahun" type="number" class="form-control form-input">
+</div><div class="mb-3">
+<label class="form-label">Desa</label>
+<select id="desa" class="form-control form-input">
+<option value="">Pilih Desa</option>
+<option>Gunungreja</option>
+<option>Karanggedang</option>
+<option>Kunci</option>
+<option>Margasari</option>
+<option>Penyarang</option>
+<option>Sidamulya</option>
+<option>Sidareja</option>
+<option>Sudagaran</option>
+<option>Tegalsari</option>
+<option>Tinggarjaya</option>
+</select>
+</div><div class="mb-3">
+<label class="form-label">Alamat</label>
+<input id="alamat" class="form-control form-input">
+</div><div class="mb-3">
+<label class="form-label">Nomor WhatsApp</label>
+<input id="hp" type="number" class="form-control form-input" placeholder="08xxxxxxxxxx">
+<small id="hpError" class="text-danger d-none">Nomor WA tidak valid</small>
+</div><div class="mb-3">
+<label class="form-label">Lokasi Rumah</label><input id="lokasi" class="form-control form-input mb-2" placeholder="Link Google Maps"><button class="btn btn-outline-primary btn-sm w-100" onclick="getLokasi()">
+<i class="bi bi-crosshair"></i> Ambil Lokasi Saat Ini
+</button></div><button id="btnKirim" class="btn btn-primary w-100">
+Kirim Data Alumni
+</button><div id="status" class="text-center mt-3"></div></div><script type="module">
+
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import{getDatabase,ref,push}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+const firebaseConfig={
+apiKey:"AIzaSyAZB64iFTGI2O8X-Ww1dltICSgHFp16UZs",
+authDomain:"database-umum.firebaseapp.com",
+databaseURL:"https://database-umum-default-rtdb.firebaseio.com",
+projectId:"database-umum",
+storageBucket:"database-umum.firebasestorage.app",
+messagingSenderId:"682180323327",
+appId:"1:682180323327:web:d3faf3cf746a35e7ff69ca"
+};
+
+const app=initializeApp(firebaseConfig);
+const db=getDatabase(app);
+
+const inputs=document.querySelectorAll(".form-input");
+const progressBar=document.getElementById("progressBar");
+
+function updateProgress(){
+
+let total=inputs.length;
+let filled=0;
+
+inputs.forEach(i=>{
+if(i.type==="radio"){
+if(document.querySelector('input[name="jk"]:checked'))filled++
+}else{
+if(i.value.trim()!="")filled++
+}
+});
+
+let percent=Math.min(100,Math.round((filled/total)*100));
+progressBar.style.width=percent+"%";
+
+}
+
+inputs.forEach(i=>{
+i.addEventListener("input",updateProgress);
+i.addEventListener("change",updateProgress);
+});
+
+function validWA(no){
+
+let hp=no.replace(/\s/g,'');
+
+if(!/^08\d{8,12}$/.test(hp))return false;
+
+return true;
+
+}
+
+btnKirim.onclick=()=>{
+
+let nama=document.getElementById("nama").value.trim();
+let tahun=document.getElementById("tahun").value;
+let desa=document.getElementById("desa").value;
+let alamat=document.getElementById("alamat").value.trim();
+let hp=document.getElementById("hp").value.trim();
+let lokasi=document.getElementById("lokasi").value.trim();
+let jk=document.querySelector('input[name="jk"]:checked')?.value;
+
+let status=document.getElementById("status");
+
+if(!nama||!tahun||!desa||!alamat||!hp||!jk){
+status.innerHTML="<span class='text-danger'>Lengkapi semua data</span>";
+return;
+}
+
+if(!validWA(hp)){
+document.getElementById("hpError").classList.remove("d-none");
+return;
+}else{
+document.getElementById("hpError").classList.add("d-none");
+}
+
+push(ref(db,"Kecamatan Sidareja/"+desa),{
+nama,
+tahun_lulus:tahun,
+alamat,
+no_hp:hp,
+lokasi,
+jk
+});
+
+status.innerHTML="<span class='text-success'>Data berhasil dikirim</span>";
+
+document.querySelectorAll("input").forEach(e=>e.value="");
+document.querySelectorAll('input[name="jk"]').forEach(e=>e.checked=false);
+
+updateProgress();
+
+}
+
+window.getLokasi=function(){
+
+if(!navigator.geolocation){
+alert("Browser tidak mendukung GPS");
+return;
+}
+
+navigator.geolocation.getCurrentPosition(pos=>{
+
+let lat=pos.coords.latitude;
+let lng=pos.coords.longitude;
+
+let link=`https://www.google.com/maps?q=${lat},${lng}`;
+
+document.getElementById("lokasi").value=link;
+
+updateProgress();
+
+});
+
+}
+
+updateProgress();
+
+</script></body>
+</html>
