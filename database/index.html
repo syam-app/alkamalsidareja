@@ -156,6 +156,8 @@ color:#555;
 .btn-help:active{
 transform:scale(0.9);
 }
+
+*{scale: (0.8);}
 </style>
 </head>
 
@@ -280,10 +282,10 @@ data-bs-target="#modalTambah">+</button>
 </div>
 </div>
 
-<input id="tahun" class="form-control mb-2" placeholder="Tahun Lulus">
-<input id="alamat" class="form-control mb-2" placeholder="Alamat">
-<input id="hp" class="form-control mb-2" placeholder="No HP">
-<input id="lokasi" class="form-control mb-2" placeholder="Link lokasi Google Maps">
+<input id="tahun" class="form-control mb-2" placeholder="Tahun Lulus" type="number">
+<input id="alamat" class="form-control mb-2" placeholder="Alamat (Isi RT/RW saja)">
+<input id="hp" class="form-control mb-2" placeholder="No HP" type="number">
+<input id="lokasi" class="form-control mb-2" placeholder="Link lokasi Google Maps" readonly>
 <div class="d-grid mb-2">
 <button class="btn btn-outline-primary btn-sm" onclick="getLokasi()">
 <i class="bi bi-crosshair"></i> Ambil Lokasi Saat Ini
@@ -314,10 +316,10 @@ data-bs-target="#modalTambah">+</button>
 </div>
 </div>
 
-<input id="editTahun" class="form-control mb-2">
+<input id="editTahun" class="form-control mb-2" type="number">
 <input id="editAlamat" class="form-control mb-2">
-<input id="editHP" class="form-control mb-2">
-<input id="editLokasi" class="form-control mb-2">
+<input id="editHP" class="form-control mb-2" type="number">
+<input id="editLokasi" class="form-control mb-2" readonly>
 <button class="btn btn-outline-primary btn-sm" onclick="getLokasiEdit()">
 <i class="bi bi-crosshair"></i> Update Lokasi
 </button>
@@ -340,7 +342,7 @@ data-bs-target="#modalTambah">+</button>
 <div class="modal-body">
 
 <h6>1. Menambah Data Alumni</h6>
-<p>Untuk menambah data alumni:</p>
+
 <ol>
 <li>Buka halaman <b>Database</b>.</li>
 <li>Tekan tombol <b>Tambah Data (+)</b>.</li>
@@ -348,20 +350,10 @@ data-bs-target="#modalTambah">+</button>
 <li>Tekan tombol <b>Simpan</b>.</li>
 </ol>
 
-<ul>
-<li>Nama : Nama lengkap alumni</li>
-<li>Jenis Kelamin : L / P</li>
-<li>Tahun Lulus : Tahun kelulusan</li>
-<li>Alamat : Alamat rumah alumni</li>
-<li>No HP : Nomor WhatsApp alumni</li>
-<li>Lokasi : Link Google Maps rumah alumni</li>
-</ul>
-
 <hr>
 
 <h6>2. Cara Menambahkan Lokasi Rumah Alumni</h6>
 
-<p><b>Cara 1 (Menggunakan GPS Otomatis)</b></p>
 <ol>
 <li>Tekan tombol <b>Ambil Lokasi</b>.</li>
 <li>Izinkan akses lokasi pada browser.</li>
@@ -369,35 +361,21 @@ data-bs-target="#modalTambah">+</button>
 <li>Link Google Maps akan otomatis muncul di kolom lokasi.</li>
 </ol>
 
-<p><b>Cara 2 (Manual dari Google Maps)</b></p>
-<ol>
-<li>Buka aplikasi Google Maps.</li>
-<li>Cari lokasi rumah alumni.</li>
-<li>Tekan dan tahan titik lokasi rumah.</li>
-<li>Pilih menu <b>Bagikan</b>.</li>
-<li>Salin link Google Maps.</li>
-<li>Tempelkan link tersebut di kolom <b>Lokasi</b>.</li>
-</ol>
-
 <hr>
 
 <h6>3. Mengedit / Update Data Alumni</h6>
-
-<p>Untuk memperbarui data alumni:</p>
 
 <ol>
 <li>Tekan ikon <i class="bi bi-pencil"></i> pada data alumni.</li>
 <li>Form edit akan muncul.</li>
 <li>Ubah data yang ingin diperbarui.</li>
-<li>Jika ingin memperbarui lokasi tekan tombol <b>Ambil Lokasi</b>.</li>
+<li>Jika ingin memperbarui lokasi tekan tombol <b>Update Lokasi</b>.</li>
 <li>Tekan tombol <b>Update</b> untuk menyimpan perubahan.</li>
 </ol>
 
 <hr>
 
 <h6>4. Menghapus Data Alumni</h6>
-
-<p>Untuk menghapus data:</p>
 
 <ol>
 <li>Tekan ikon <i class="bi bi-trash"></i>.</li>
@@ -408,8 +386,6 @@ data-bs-target="#modalTambah">+</button>
 <hr>
 
 <h6>5. Menghubungi Alumni</h6>
-
-<p>Untuk mengirim pesan WhatsApp:</p>
 
 <ol>
 <li>Tekan ikon <i class="bi bi-whatsapp"></i>.</li>
@@ -472,7 +448,16 @@ data-bs-target="#modalTambah">+</button>
 <script type="module">
 
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import{getDatabase,ref,push,remove,update,onValue}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import {
+  getDatabase,
+  ref,
+  push,
+  remove,
+  update,
+  onChildAdded,
+  onChildChanged,
+  onChildRemoved
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const firebaseConfig={
 apiKey:"AIzaSyAZB64iFTGI2O8X-Ww1dltICSgHFp16UZs",
@@ -539,25 +524,63 @@ listen()
 
 function listen(){
 
-onValue(ref(db,"Kecamatan Sidareja"),snap=>{
+const kecRef = ref(db,"Kecamatan Sidareja")
 
-allData=[];
-if(!snap.exists()){ document.getElementById("loading").innerText="Belum ada data"; return; }
+// dengarkan desa
+onChildAdded(kecRef,(desaSnap)=>{
 
-let data=snap.val();
+const desa = desaSnap.key
 
-for(const desa in data){
-for(const id in data[desa]){
-let d=data[desa][id];
-d.id=id;
-d.desa=desa;
+listenDesa(desa)
+
+})
+
+}
+
+// listener alumni di tiap desa
+function listenDesa(desa){
+
+const desaRef = ref(db,"Kecamatan Sidareja/"+desa)
+
+// tambah alumni
+onChildAdded(desaRef,(snap)=>{
+
+let d = snap.val()
+d.id = snap.key
+d.desa = desa
+
 allData.push(d)
-}
-}
 
 render()
 isiFilterTahun()
 document.getElementById("loading").style.display="none"
+
+})
+
+// update alumni
+onChildChanged(desaRef,(snap)=>{
+
+let d = snap.val()
+d.id = snap.key
+d.desa = desa
+
+let i = allData.findIndex(x=>x.id===d.id && x.desa===desa)
+
+if(i>-1) allData[i]=d
+
+render()
+
+})
+
+// hapus alumni
+onChildRemoved(desaRef,(snap)=>{
+
+let id = snap.key
+
+allData = allData.filter(x=>!(x.id===id && x.desa===desa))
+
+render()
+
 })
 
 }
@@ -589,8 +612,8 @@ html+=`
 <div class="alumni">
 <div class="avatar" style="background:${color(d.nama)}">${avatar(d.nama)}</div>
 <div style="flex:1">
-<b>${d.nama}</b><br>
-<span class="text-secondary">${d.jk} / Alumni ${d.tahun_lulus}<br>
+<b style="font-size:1.1rem;">${d.nama}</b>
+<span class="text-secondary d-inline-block" style="line-height:1.25rem;">${d.jk} / Alumni ${d.tahun_lulus}<br>
 ${d.desa} ${d.alamat}</span>
 </div>
 <div class="aksi-grid">
@@ -811,4 +834,4 @@ btnDashboard.classList.remove("active");
 
 init();
 
-  </script>
+</script>
